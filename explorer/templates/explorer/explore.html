@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Explorer</title>
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        body{
+            font-family: Arial;
+            background:#f4f4f4;
+            padding:20px;
+        }
+
+        .container{
+            background:white;
+            padding:20px;
+            border-radius:10px;
+        }
+
+        table{
+            width:100%;
+            border-collapse: collapse;
+        }
+
+        th, td{
+            padding:12px;
+            border-bottom:1px solid #ddd;
+            text-align:left;
+        }
+
+        a{
+            text-decoration:none;
+            color:#0077cc;
+        }
+
+        .breadcrumbs{
+            margin-bottom:20px;
+        }
+
+        .breadcrumbs a{
+            margin-right:5px;
+        }
+
+        .folder{
+            color:#f4b400;
+        }
+
+        .file{
+            color:#555;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📁 Django File Explorer</h1>
+
+<div class="breadcrumbs">
+    <a href="/explore/">Home</a>
+
+    {% for crumb in breadcrumbs %}
+        / <a href="/explore/{{ crumb.path }}/">{{ crumb.name }}</a>
+    {% endfor %}
+</div>
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Size</th>
+        <th>Last Modified</th>
+    </tr>
+
+    {% for item in items %}
+    <tr>
+
+        <td>
+
+            {% if item.is_dir %}
+                <i class="fa-solid fa-folder folder"></i>
+
+                <a href="/explore/{{ item.path }}/">
+                    {{ item.name }}
+                </a>
+
+            {% else %}
+                <i class="fa-solid fa-file file"></i>
+                {{ item.name }}
+            {% endif %}
+
+        </td>
+
+        <td>{{ item.size }} bytes</td>
+
+        <td>{{ item.modified }}</td>
+
+    </tr>
+    {% endfor %}
+
+</table>
+
+</div>
+
+</body>
+</html>
