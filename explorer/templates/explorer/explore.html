@@ -1,108 +1,301 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>File Explorer</title>
 
-    <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<head>
+
+    <title>Django File Explorer</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        body{
+        body {
             font-family: Arial;
-            background:#f4f4f4;
-            padding:20px;
+            background: #121212;
+            color: white;
+            padding: 20px;
         }
 
-        .container{
-            background:white;
-            padding:20px;
-            border-radius:10px;
+        .container {
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
         }
 
-        table{
-            width:100%;
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .top-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #2a2a2a;
+            color: white;
+        }
+
+        .upload-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
         }
 
-        th, td{
-            padding:12px;
-            border-bottom:1px solid #ddd;
-            text-align:left;
+        th,
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #333;
+            text-align: left;
         }
 
-        a{
-            text-decoration:none;
-            color:#0077cc;
+        tr:hover {
+            background: #2a2a2a;
+            transition: 0.3s;
         }
 
-        .breadcrumbs{
-            margin-bottom:20px;
+        a {
+            text-decoration: none;
+            color: #4da6ff;
         }
 
-        .breadcrumbs a{
-            margin-right:5px;
+        .breadcrumbs {
+            margin-bottom: 20px;
         }
 
-        .folder{
-            color:#f4b400;
+        .breadcrumbs a {
+            margin-right: 5px;
+            color: #ffcc00;
         }
 
-        .file{
-            color:#555;
+        .folder {
+            color: #f4b400;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .preview-btn {
+            background: #17a2b8;
+        }
+
+        .download-btn {
+            background: #007bff;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+        }
+
+        .stats {
+            margin-top: 10px;
+            color: #aaa;
         }
     </style>
+
 </head>
 
 <body>
 
-<div class="container">
+    <div class="container">
 
-<h1>📁 Django File Explorer</h1>
+        <h1>📁 Django File Explorer</h1>
 
-<div class="breadcrumbs">
-    <a href="/explore/">Home</a>
+        <div class="stats">
+            Total Files/Folders: {{ items|length }}
+        </div>
 
-    {% for crumb in breadcrumbs %}
-        / <a href="/explore/{{ crumb.path }}/">{{ crumb.name }}</a>
-    {% endfor %}
-</div>
+        <form action="/upload/{{ current_path }}" method="POST" enctype="multipart/form-data">
 
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Size</th>
-        <th>Last Modified</th>
-    </tr>
+            {% csrf_token %}
 
-    {% for item in items %}
-    <tr>
+            <div class="top-bar">
 
-        <td>
+                <input type="text" id="searchInput" class="search-box" placeholder="Search files...">
 
-            {% if item.is_dir %}
-                <i class="fa-solid fa-folder folder"></i>
+                <input type="file" name="file">
 
-                <a href="/explore/{{ item.path }}/">
+                <button class="upload-btn" type="submit">
+                    Upload
+                </button>
+
+            </div>
+
+        </form>
+
+        <div class="breadcrumbs">
+
+            <a href="/explore/">Home</a>
+
+            {% for crumb in breadcrumbs %}
+
+            / <a href="/explore/{{ crumb.path }}/">
+                {{ crumb.name }}
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+        <table>
+
+            <tr>
+                <th>Name</th>
+                <th>Size</th>
+                <th>Last Modified</th>
+                <th>Preview</th>
+                <th>Download</th>
+                <th>Delete</th>
+            </tr>
+
+            {% for item in items %}
+
+            <tr>
+
+                <td>
+
+                    {% if item.is_dir %}
+
+                    <i class="fa-solid fa-folder folder"></i>
+
+                    <a href="/explore/{{ item.path }}/">
+                        {{ item.name }}
+                    </a>
+
+                    {% else %}
+
+                    {% if ".pdf" in item.name %}
+                    <i class="fa-solid fa-file-pdf"></i>
+
+                    {% elif ".png" in item.name or ".jpg" in item.name or ".jpeg" in item.name %}
+                    <i class="fa-solid fa-image"></i>
+
+                    {% elif ".mp4" in item.name %}
+                    <i class="fa-solid fa-video"></i>
+
+                    {% elif ".py" in item.name %}
+                    <i class="fa-brands fa-python"></i>
+
+                    {% else %}
+                    <i class="fa-solid fa-file"></i>
+                    {% endif %}
+
                     {{ item.name }}
-                </a>
 
-            {% else %}
-                <i class="fa-solid fa-file file"></i>
-                {{ item.name }}
-            {% endif %}
+                    {% endif %}
 
-        </td>
+                </td>
 
-        <td>{{ item.size }} bytes</td>
+                <td>{{ item.size }} bytes</td>
 
-        <td>{{ item.modified }}</td>
+                <td>{{ item.modified }}</td>
 
-    </tr>
-    {% endfor %}
+                <td>
 
-</table>
+                    {% if not item.is_dir %}
 
-</div>
+                    {% if ".png" in item.name or ".jpg" in item.name or ".jpeg" in item.name %}
+
+                    <a class="action-btn preview-btn" target="_blank" href="/preview/{{ item.path }}">
+                        Preview
+                    </a>
+
+                    {% endif %}
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {% if not item.is_dir %}
+
+                    <a class="action-btn download-btn" href="/download/{{ item.path }}">
+                        Download
+                    </a>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    {% if not item.is_dir %}
+
+                    <a class="action-btn delete-btn" href="/delete/{{ item.path }}"
+                        onclick="return confirm('Delete this file?')">
+                        Delete
+                    </a>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td colspan="6">
+                    No files found
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+
+    <script>
+
+        const searchInput = document.getElementById("searchInput");
+
+        searchInput.addEventListener("keyup", function () {
+
+            let filter = searchInput.value.toLowerCase();
+
+            let rows = document.querySelectorAll("table tr");
+
+            rows.forEach((row, index) => {
+
+                if (index === 0) return;
+
+                let text = row.innerText.toLowerCase();
+
+                row.style.display =
+                    text.includes(filter)
+                        ? ""
+                        : "none";
+
+            });
+
+        });
+
+    </script>
 
 </body>
+
 </html>
